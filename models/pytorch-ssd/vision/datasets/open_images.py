@@ -44,6 +44,7 @@ class OpenImagesDataset:
 
     def __getitem__(self, index):
         _, image, boxes, labels = self._getitem(index)
+        print(boxes)
         return image, boxes, labels
 
     def get_annotation(self, index):

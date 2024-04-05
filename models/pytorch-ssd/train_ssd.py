@@ -24,6 +24,7 @@ from vision.ssd.mobilenet_v2_ssd_lite import create_mobilenetv2_ssd_lite
 from vision.ssd.squeezenet_ssd_lite import create_squeezenet_ssd_lite
 from vision.datasets.voc_dataset import VOCDataset
 from vision.datasets.open_images import OpenImagesDataset
+from vision.datasets.synthtext_dataset import SynthTextDataset
 from vision.nn.multibox_loss import MultiboxLoss
 from vision.ssd.config import vgg_ssd_config
 from vision.ssd.config import mobilenetv1_ssd_config
@@ -272,6 +273,13 @@ if __name__ == '__main__':
             store_labels(label_file, dataset.class_names)
             logging.info(dataset)
             num_classes = len(dataset.class_names)
+        elif args.dataset_type == 'synthtext':
+            dataset = SynthTextDataset(dataset_path, transform=train_transform,
+                                 target_transform=target_transform)
+            label_file = os.path.join(args.checkpoint_folder, "synthtext-labels.txt")
+            store_labels(label_file, dataset.class_names)
+            logging.info(dataset)
+            num_classes = len(dataset.class_names)
 
         else:
             raise ValueError(f"Dataset type {args.dataset_type} is not supported.")
@@ -294,6 +302,10 @@ if __name__ == '__main__':
         val_dataset = OpenImagesDataset(dataset_path,
                                         transform=test_transform, target_transform=target_transform,
                                         dataset_type="test")
+        logging.info(val_dataset)
+    elif args.dataset_type == 'synthtext':
+        val_dataset = SynthTextDataset(dataset_path, transform=train_transform,
+                                 target_transform=target_transform, split='val')
         logging.info(val_dataset)
     logging.info("Validation dataset size: {}".format(len(val_dataset)))
 
