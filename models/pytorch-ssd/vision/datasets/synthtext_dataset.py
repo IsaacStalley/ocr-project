@@ -24,9 +24,10 @@ class SynthTextDataset:
         self.class_names = ('BACKGROUND', 'text')
 
         if self.split == 'train':
-            self.image_paths = self.image_paths[:int(0.1*len(self.image_paths))]
+            self.image_paths = self.image_paths[:int(0.01*len(self.image_paths))]
         elif self.split == 'val':
-            self.image_paths = self.image_paths[int(0.9*len(self.image_paths)):]
+            self.image_paths = self.image_paths[int(0.99*len(self.image_paths)):]
+            self.word_bounding_boxes = self.word_bounding_boxes[int(0.99*len(self.word_bounding_boxes)):]
 
     def __len__(self):
         return len(self.image_paths)

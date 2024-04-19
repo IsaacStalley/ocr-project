@@ -7,7 +7,7 @@ from ..utils.misc import Timer
 
 class Predictor:
     def __init__(self, net, size, mean=0.0, std=1.0, nms_method=None,
-                 iou_threshold=0.45, filter_threshold=0.01, candidate_size=200, sigma=0.5, device=None):
+                 iou_threshold=0, filter_threshold=0.01, candidate_size=200, sigma=0.5, device=None):
         self.net = net
         self.transform = PredictionTransform(size, mean, std)
         self.iou_threshold = iou_threshold
@@ -20,7 +20,6 @@ class Predictor:
             self.device = device
         else:
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
         self.net.to(self.device)
         self.timer = Timer()
 

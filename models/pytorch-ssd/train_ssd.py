@@ -25,6 +25,8 @@ from vision.ssd.squeezenet_ssd_lite import create_squeezenet_ssd_lite
 from vision.datasets.voc_dataset import VOCDataset
 from vision.datasets.open_images import OpenImagesDataset
 from vision.datasets.synthtext_dataset import SynthTextDataset
+from vision.datasets.gnhk_dataset import GnhkTextDataset
+from vision.datasets.iam_dataset import IAMTextDataset
 from vision.nn.multibox_loss import MultiboxLoss
 from vision.ssd.config import vgg_ssd_config
 from vision.ssd.config import mobilenetv1_ssd_config
@@ -41,7 +43,7 @@ parser = argparse.ArgumentParser(
     description='Single Shot MultiBox Detector Training With PyTorch')
 
 # Params for datasets
-parser.add_argument("--dataset-type", default="open_images", type=str,
+parser.add_argument("--dataset-type", nargs='+', default=["open_images"],
                     help='Specify dataset type. Currently supports voc and open_images.')
 parser.add_argument('--datasets', '--data', nargs='+', default=["data"], help='Dataset directory path')
 parser.add_argument('--balance-data', action='store_true',
@@ -73,7 +75,7 @@ parser.add_argument('--weight-decay', default=5e-4, type=float,
                     help='Weight decay for SGD')
 parser.add_argument('--gamma', default=0.1, type=float,
                     help='Gamma update for SGD')
-parser.add_argument('--base-net-lr', default=0.001, type=float,
+parser.add_argument('--base-net-lr', default=0.01, type=float,
                     help='initial learning rate for base net, or None to use --lr')
 parser.add_argument('--extra-layers-lr', default=None, type=float,
                     help='initial learning rate for the layers not in base net and prediction heads.')
@@ -258,14 +260,14 @@ if __name__ == '__main__':
     # load datasets (could be multiple)
     logging.info("Prepare training datasets.")
     datasets = []
-    for dataset_path in args.datasets:
-        if args.dataset_type == 'voc':
+    for idx,dataset_path in enumerate(args.datasets):
+        if args.dataset_type[idx] == 'voc':
             dataset = VOCDataset(dataset_path, transform=train_transform,
                                  target_transform=target_transform)
             label_file = os.path.join(args.checkpoint_folder, "labels.txt")
             store_labels(label_file, dataset.class_names)
             num_classes = len(dataset.class_names)
-        elif args.dataset_type == 'open_images':
+        elif args.dataset_type[idx] == 'open_images':
             dataset = OpenImagesDataset(dataset_path,
                  transform=train_transform, target_transform=target_transform,
                  dataset_type="train", balance_data=args.balance_data)
@@ -273,10 +275,24 @@ if __name__ == '__main__':
             store_labels(label_file, dataset.class_names)
             logging.info(dataset)
             num_classes = len(dataset.class_names)
-        elif args.dataset_type == 'synthtext':
+        elif args.dataset_type[idx] == 'synthtext':
             dataset = SynthTextDataset(dataset_path, transform=train_transform,
                                  target_transform=target_transform)
             label_file = os.path.join(args.checkpoint_folder, "synthtext-labels.txt")
+            store_labels(label_file, dataset.class_names)
+            logging.info(dataset)
+            num_classes = len(dataset.class_names)
+        elif args.dataset_type[idx] == 'gnhk':
+            dataset = GnhkTextDataset(dataset_path, transform=train_transform,
+                                 target_transform=target_transform)
+            label_file = os.path.join(args.checkpoint_folder, "gnhk-labels.txt")
+            store_labels(label_file, dataset.class_names)
+            logging.info(dataset)
+            num_classes = len(dataset.class_names)
+        elif args.dataset_type[idx] == 'iam':
+            dataset = IAMTextDataset(dataset_path, transform=train_transform,
+                                 target_transform=target_transform)
+            label_file = os.path.join(args.checkpoint_folder, "iam-labels.txt")
             store_labels(label_file, dataset.class_names)
             logging.info(dataset)
             num_classes = len(dataset.class_names)
@@ -284,7 +300,7 @@ if __name__ == '__main__':
         else:
             raise ValueError(f"Dataset type {args.dataset_type} is not supported.")
         datasets.append(dataset)
-        
+    logging.info(f"Datasets: {datasets}")
     # create training dataset
     logging.info(f"Stored labels into file {label_file}.")
     train_dataset = ConcatDataset(datasets)
@@ -295,18 +311,31 @@ if __name__ == '__main__':
                            
     # create validation dataset                           
     logging.info("Prepare Validation datasets.")
-    if args.dataset_type == "voc":
-        val_dataset = VOCDataset(dataset_path, transform=test_transform,
-                                 target_transform=target_transform, is_test=True)
-    elif args.dataset_type == 'open_images':
-        val_dataset = OpenImagesDataset(dataset_path,
-                                        transform=test_transform, target_transform=target_transform,
-                                        dataset_type="test")
-        logging.info(val_dataset)
-    elif args.dataset_type == 'synthtext':
-        val_dataset = SynthTextDataset(dataset_path, transform=train_transform,
-                                 target_transform=target_transform, split='val')
-        logging.info(val_dataset)
+    val_datasets = []
+    for idx,dataset_path in enumerate(args.datasets):
+        if args.dataset_type[idx] == "voc":
+            val_dataset = VOCDataset(dataset_path, transform=test_transform,
+                                    target_transform=target_transform, is_test=True)
+        elif args.dataset_type[idx] == 'open_images':
+            val_dataset = OpenImagesDataset(dataset_path,
+                                            transform=test_transform, target_transform=target_transform,
+                                            dataset_type="test")
+            logging.info(val_dataset)
+        elif args.dataset_type[idx] == 'synthtext':
+            val_dataset = SynthTextDataset(dataset_path, transform=train_transform,
+                                    target_transform=target_transform, split='val')
+            logging.info(val_dataset)
+        elif args.dataset_type[idx] == 'gnhk':
+            val_dataset = GnhkTextDataset(dataset_path, transform=train_transform,
+                                    target_transform=target_transform, split='val')
+            logging.info(val_dataset)
+        elif args.dataset_type[idx] == 'iam':
+            val_dataset = IAMTextDataset(dataset_path, transform=train_transform,
+                                    target_transform=target_transform, split='val')
+            logging.info(val_dataset)
+        val_datasets.append(val_dataset)
+
+    val_dataset = ConcatDataset(val_datasets)
     logging.info("Validation dataset size: {}".format(len(val_dataset)))
 
     val_loader = DataLoader(val_dataset, args.batch_size,

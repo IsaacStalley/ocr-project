@@ -48,8 +48,7 @@ else:
 
 orig_image = cv2.imread(image_path)
 image = cv2.cvtColor(orig_image, cv2.COLOR_BGR2RGB)
-boxes, labels, probs = predictor.predict(image, 10, 0.4)
-
+boxes, labels, probs = predictor.predict(image, -1, 0.2)
 for i in range(boxes.size(0)):
     box = boxes[i, :]
     box = box.numpy().astype(int).tolist()
