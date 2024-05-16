@@ -27,6 +27,7 @@ from vision.datasets.open_images import OpenImagesDataset
 from vision.datasets.synthtext_dataset import SynthTextDataset
 from vision.datasets.gnhk_dataset import GnhkTextDataset
 from vision.datasets.iam_dataset import IAMTextDataset
+from vision.datasets.imgur_dataset import ImgurDataset
 from vision.nn.multibox_loss import MultiboxLoss
 from vision.ssd.config import vgg_ssd_config
 from vision.ssd.config import mobilenetv1_ssd_config
@@ -63,7 +64,7 @@ parser.add_argument('--mb2-width-mult', default=1.0, type=float,
 
 # Params for loading pretrained basenet or checkpoints.
 parser.add_argument('--base-net', help='Pretrained base model')
-parser.add_argument('--pretrained-ssd', default=DEFAULT_PRETRAINED_MODEL, type=str, help='Pre-trained base model')
+parser.add_argument('--pretrained-ssd', default=None, type=str, help='Pre-trained base model')
 parser.add_argument('--resume', default=None, type=str, help='Checkpoint state_dict file to resume training from')
 
 # Params for SGD
@@ -75,7 +76,7 @@ parser.add_argument('--weight-decay', default=5e-4, type=float,
                     help='Weight decay for SGD')
 parser.add_argument('--gamma', default=0.1, type=float,
                     help='Gamma update for SGD')
-parser.add_argument('--base-net-lr', default=0.01, type=float,
+parser.add_argument('--base-net-lr', default=0.001, type=float,
                     help='initial learning rate for base net, or None to use --lr')
 parser.add_argument('--extra-layers-lr', default=None, type=float,
                     help='initial learning rate for the layers not in base net and prediction heads.')
@@ -148,7 +149,7 @@ def train(loader, net, criterion, optimizer, device, debug_steps=100, epoch=-1):
         optimizer.zero_grad()
         confidence, locations = net(images)
         regression_loss, classification_loss = criterion(confidence, locations, labels, boxes)
-        loss = regression_loss + classification_loss
+        loss = regression_loss*2 + classification_loss
         loss.backward()
         optimizer.step()
 
@@ -296,6 +297,13 @@ if __name__ == '__main__':
             store_labels(label_file, dataset.class_names)
             logging.info(dataset)
             num_classes = len(dataset.class_names)
+        elif args.dataset_type[idx] == 'imgur':
+            dataset = ImgurDataset(dataset_path, transform=train_transform,
+                                 target_transform=target_transform)
+            label_file = os.path.join(args.checkpoint_folder, "imgur-labels.txt")
+            store_labels(label_file, dataset.class_names)
+            logging.info(dataset)
+            num_classes = len(dataset.class_names)
 
         else:
             raise ValueError(f"Dataset type {args.dataset_type} is not supported.")
@@ -331,6 +339,10 @@ if __name__ == '__main__':
             logging.info(val_dataset)
         elif args.dataset_type[idx] == 'iam':
             val_dataset = IAMTextDataset(dataset_path, transform=train_transform,
+                                    target_transform=target_transform, split='val')
+            logging.info(val_dataset)
+        elif args.dataset_type[idx] == 'imgur':
+            val_dataset = ImgurDataset(dataset_path, transform=train_transform,
                                     target_transform=target_transform, split='val')
             logging.info(val_dataset)
         val_datasets.append(val_dataset)

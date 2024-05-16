@@ -4,6 +4,7 @@ from PIL import Image
 import scipy.io as sio
 import cv2
 import copy
+import random
 
 class SynthTextDataset:
     def __init__(self, root_dir, transform=None, target_transform=None, split='train'):
@@ -24,15 +25,16 @@ class SynthTextDataset:
         self.class_names = ('BACKGROUND', 'text')
 
         if self.split == 'train':
-            self.image_paths = self.image_paths[:int(0.01*len(self.image_paths))]
+            self.image_paths = self.image_paths[:int(0.9*len(self.image_paths))]
         elif self.split == 'val':
             self.image_paths = self.image_paths[int(0.99*len(self.image_paths)):]
             self.word_bounding_boxes = self.word_bounding_boxes[int(0.99*len(self.word_bounding_boxes)):]
 
     def __len__(self):
-        return len(self.image_paths)
+        return 8000
 
     def __getitem__(self, idx):
+        idx = random.randint(0, len(self.image_paths) - 1)
         image_path = os.path.join(self.root_dir, self.image_paths[idx][0])
         if image_path is None:
             raise IOError(f"failed to find {image_path}")
