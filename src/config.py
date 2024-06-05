@@ -10,8 +10,8 @@ crnn_config = {
     'map_to_seq_hidden': 64,
     'rnn_hidden': 256,
     'leaky_relu': False,
-    'model_path': '../models/trained/crnn_three/crnn_312000_loss3.0251498906743617.pt',
-    'chars': '0123456789abcdefghijklmnopqrstuvwxyz!"#$%&()*+,-./:;<=>?@[\]\'^_`{|}~ ',
+    'model_path': '../models/trained/crnn/crnn_022000_loss1.8129272557759804.pt',
+    'chars': '!"#$%&\'()*+,-./0123456789:;<=>?@[\]^_`abcdefghijklmnopqrstuvwxyz{|}~',
     'decode_method': 'greedy',
     'beam_size': 10,
 }

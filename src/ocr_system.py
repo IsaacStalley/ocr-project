@@ -46,7 +46,7 @@ class TextRecognitionSystem:
         CHARS = crnn_config['chars']
         CHAR2LABEL = {char: i for i, char in enumerate(CHARS)}
         self.LABEL2CHAR = {label: char for char, label in CHAR2LABEL.items()}
-        num_class = len(self.LABEL2CHAR) + 1
+        num_class = len(self.LABEL2CHAR) #+ 1
         self.crnn = CRNN(1, crnn_config['img_height'], crnn_config['img_width'], num_class,
                     map_to_seq_hidden=crnn_config['map_to_seq_hidden'],
                     rnn_hidden=crnn_config['rnn_hidden'],
@@ -72,12 +72,6 @@ class TextRecognitionSystem:
             x_min, y_min, x_max, y_max = map(int, box)
             word_image = orig_image[y_min:y_max, x_min:x_max]
             word_images.append(word_image)
-        
-        for box in boxes:
-            x_min, y_min, x_max, y_max = map(int, box)
-            cv2.rectangle(orig_image, (x_min, y_min), (x_max, y_max), (255, 255, 0), 4)
-        path = "run_ssd_example_output.jpg"
-        cv2.imwrite(path, orig_image)
 
         # Prepare the word images for CRNN
         word_dataset = SingleImageDataset(word_images, crnn_config['img_height'], crnn_config['img_width'])
@@ -85,8 +79,21 @@ class TextRecognitionSystem:
 
         # Predict the text using CRNN
         preds = self.predict(word_loader)
+        words = [''.join(word) for word in preds]
 
-        return preds, line_indeces
+        for i, box in enumerate(boxes):
+            x_min, y_min, x_max, y_max = map(int, box)
+            cv2.rectangle(orig_image, (x_min, y_min), (x_max, y_max), (255, 255, 0), 4)
+            cv2.putText(orig_image, words[i],
+                (x_min + 5, y_min + 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,  # font scale
+                (255, 0, 255),
+                2)  # line type
+        path = "run_ssd_example_output.jpg"
+        cv2.imwrite(path, orig_image)
+
+        return words, line_indeces
 
     def predict(self, dataloader):
         all_preds = []

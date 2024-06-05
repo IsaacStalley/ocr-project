@@ -62,22 +62,23 @@ def filter_overlapping_boxes(boxes):
 
     return filtered_boxes
 
-def filter_small_boxes(boxes, image, area_percentage_threshold=0.0001):
+def filter_small_boxes(boxes, image, area_percentage_threshold=0.001):
     image_height, image_width = image.shape[:2]
     area_threshold = area_percentage_threshold * (image_height * image_width)
     return [box for box in boxes if compute_area(box) >= area_threshold]
 
-def add_box_buffer(boxes, image, area_percentage_threshold=0.0004):
+def add_box_buffer(boxes, image, area_percentage_threshold=0.0002):
     buffered_boxes = []
     image_height, image_width = image.shape[:2]
-    BUFFER = area_percentage_threshold * (image_height * image_width)/100
+    BUFFERX = area_percentage_threshold * (image_height * image_width)/100
+    BUFFERY = area_percentage_threshold * (image_height * image_width)/50
     for box in boxes:
         x_min, y_min, x_max, y_max = map(int, box)
         # Add buffer to each side of the box
-        x_min -= BUFFER
-        y_min -= BUFFER
-        x_max += BUFFER
-        y_max += BUFFER
+        x_min -= BUFFERX
+        y_min -= BUFFERY
+        x_max += BUFFERX
+        y_max += BUFFERY
         # Ensure the coordinates are within the image bounds
         x_min = max(x_min, 0)
         y_min = max(y_min, 0)
