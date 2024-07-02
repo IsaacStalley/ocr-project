@@ -8,10 +8,10 @@ from ocr_system import TextRecognitionSystem
 ocr = TextRecognitionSystem()
 
 # Bot token
-bot = telebot.TeleBot('7311968583:AAECmee_-o0OMk_WQK6pjyt5AbMiXvZbue8')
+bot = telebot.TeleBot('TOKEN')
 
 # Group chat id
-GROUP_CHAT_ID = -4252658220
+GROUP_CHAT_ID = 'ID'
 
 # Define the image handler
 @bot.message_handler(content_types=['photo'])
