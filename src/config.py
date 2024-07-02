@@ -1,4 +1,3 @@
-# Create an instance of the TextRecognitionSystem
 ssd_config = {
     'label_path': '../models/trained/vgg_three/iam-labels.txt',
     'model_path': '../models/trained/vgg_three/vgg16-ssd-Epoch-90-Loss-2.0508658090260976.pth',

@@ -10,9 +10,9 @@ def sort_boxes(boxes, image, percentage_threshold=0.05):
     boxes = sorted(boxes, key=lambda box: center(box)[1])
 
     image_height, image_width = image.shape[:2]
-    threshold = percentage_threshold* image_height
+    threshold = percentage_threshold * image_height
 
-    # Then, sort each group of boxes that are close vertically by center_x (horizontal center)
+    # Sort each group of boxes that are close vertically by center_x (horizontal center)
     def vertical_group_sort(boxes, threshold):
         sorted_boxes = []
         line_indices = []
@@ -36,16 +36,19 @@ def sort_boxes(boxes, image, percentage_threshold=0.05):
         return sorted_boxes, line_indices
 
     return vertical_group_sort(boxes, threshold)
-    
+
+# Compute the area of a box
 def compute_area(box):
     x_min, y_min, x_max, y_max = box
     return (x_max - x_min) * (y_max - y_min)
 
+# Check if one box is overlapping another
 def is_overlapping(box1, box2):
     x1_min, y1_min, x1_max, y1_max = box1
     x2_min, y2_min, x2_max, y2_max = box2
     return x1_min >= x2_min and y1_min >= y2_min and x1_max <= x2_max and y1_max <= y2_max
 
+# Filter out overlapping boxes
 def filter_overlapping_boxes(boxes):
     filtered_boxes = []
     areas = [compute_area(box) for box in boxes]
@@ -62,16 +65,18 @@ def filter_overlapping_boxes(boxes):
 
     return filtered_boxes
 
+# Filter out small boxes based on a threshold percentage of the image area
 def filter_small_boxes(boxes, image, area_percentage_threshold=0.001):
     image_height, image_width = image.shape[:2]
     area_threshold = area_percentage_threshold * (image_height * image_width)
     return [box for box in boxes if compute_area(box) >= area_threshold]
 
+# Add buffer to each box to include some surrounding area
 def add_box_buffer(boxes, image, area_percentage_threshold=0.0002):
     buffered_boxes = []
     image_height, image_width = image.shape[:2]
-    BUFFERX = area_percentage_threshold * (image_height * image_width)/100
-    BUFFERY = area_percentage_threshold * (image_height * image_width)/50
+    BUFFERX = area_percentage_threshold * (image_height * image_width) / 100
+    BUFFERY = area_percentage_threshold * (image_height * image_width) / 50
     for box in boxes:
         x_min, y_min, x_max, y_max = map(int, box)
         # Add buffer to each side of the box

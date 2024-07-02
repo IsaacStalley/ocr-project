@@ -1,9 +1,0 @@
-BACKGROUND
-Apple
-Banana
-Grape
-Orange
-Pear
-Pineapple
-Strawberry
-Watermelon

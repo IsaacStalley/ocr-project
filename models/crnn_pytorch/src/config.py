@@ -20,7 +20,7 @@ train_config = {
     'valid_interval': 500,
     'save_interval': 2000,
     'cpu_workers': 4,
-    'reload_checkpoint': 'models/trained/crnn/crnn_002000_loss4.340833326379768.pt',
+    'reload_checkpoint': 'models/trained/crnn/crnn_020000_loss1.9362866965646306.pt',
     'valid_max_iter': 100,
     'decode_method': 'greedy',
     'beam_size': 10,

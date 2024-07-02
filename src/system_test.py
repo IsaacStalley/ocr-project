@@ -1,12 +1,12 @@
 from ocr_system import TextRecognitionSystem
+import cv2
 
 ocr = TextRecognitionSystem()
 
 IMAGE = '../test_images/m06-091.png'
+orig_image = cv2.imread(IMAGE)
 
-words, line_indices = ocr.process_image(IMAGE)
-
-
+words, line_indices = ocr.process_image(orig_image)
 
 # Group the words by line
 words_by_line = []
