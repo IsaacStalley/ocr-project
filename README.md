@@ -4,6 +4,8 @@ Este proyecto desarrolla un sistema que detecta, reconoce y convierte texto de i
 
 ## Descripción
 
+![Diagrama de bloques](test_images/diagrama.png)
+
 El sistema utiliza dos modelos principales:
 - **SSD VGG**: Para la detección de palabras en imágenes.
 - **CRNN**: Para el reconocimiento de palabras y su conversión a texto.
